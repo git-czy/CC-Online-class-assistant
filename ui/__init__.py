@@ -7,7 +7,9 @@ import sys
 
 from PyQt5.QtWidgets import QApplication
 
-from ui.login import UiLogin
+from chome import dr
+from ui.login import UiLogin, login_click, set_code, set_user_data
+from ui.main import UiMain
 
 
 async def init_ui():
@@ -17,6 +19,14 @@ async def init_ui():
     """
     app = QApplication(sys.argv)
     login_ui = UiLogin()
+    main_ui = UiMain()
+    # 设置账号信息
+    await set_user_data(login_ui)
+    # 设置验证码
+    await set_code(login_ui)
+    # 按钮绑定事件
+    login_ui.LoginBtn.clicked.connect(lambda: login_click(login_ui, main_ui))
+
     return app, login_ui
 
 

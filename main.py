@@ -6,14 +6,17 @@
 import asyncio
 import sys
 
+from chome.login_cookie import get_route_cookie
 from ui import init_ui
 
 
 async def main():
+    await get_route_cookie()
     app, login_ui = await init_ui()
     login_ui.show()
+
     # 登录界面绑定函数
-    login_ui.LoginBtn.clicked.connect(lambda: loginbtn(login_ui, dr, Main))
+
     sys.exit(app.exec_())
 
 

@@ -21,6 +21,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 
+
 # from db_method.db_method import find_usr_iswindow, find_user_last_chapter_course, find_last_user, \
 #     update_last_user_is_ans
 # from my_socket.tcp_client import send_data
@@ -502,7 +503,7 @@ class mainw(object):
         self.setWindowIcon(icon)
 
 
-class Ui_main(QMainWindow, mainw):
+class UiMain(QMainWindow, mainw):
     def __init__(self):
         super().__init__()
         self.setupUi(self)
@@ -566,7 +567,7 @@ class Ui_main(QMainWindow, mainw):
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)
-    ui = Ui_main()
+    ui = UiMain()
     ui.StartBtn.clicked.connect(lambda: ui.start())
     ui.show()
     sys.exit(app.exec_())
