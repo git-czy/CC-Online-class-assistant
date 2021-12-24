@@ -392,6 +392,7 @@ from selenium.webdriver.common.by import By
 
 
 class mainw(object):
+
     def setupUi(self, main):
         main.setObjectName("main")
         main.resize(500, 700)
@@ -514,37 +515,37 @@ class UiMain(QMainWindow, mainw):
         self.is_ans = None
         self.app = QtWidgets.QApplication(sys.argv)
 
-    def start(self):
-        self.is_ans = 1 if self.AutoAnswer.isChecked() else 0
-        # update_last_user_is_ans(self.is_ans)
-        self.CouresCheck.setEnabled(False)
-        self.ChaptersCheck.setEnabled(False)
-        self.StartBtn.setEnabled(False)
-        self.AutoAnswer.setEnabled(False)
-        # 创建线程
-        # self.thread = Runthread()
-        # 连接信号
-        self.thread.signal1.connect(self.Progress)  # 进程连接回传到GUI的事件
-        self.thread.signal2.connect(self.showstate)  # 进程连接回传到GUI的事件
-        self.thread.signal3.connect(self.showlog)  # 进程连接回传到GUI的事件
-        self.thread.signal4.connect(self.driver_handle)  # 进程连接回传到GUI的事件
-        # self.
-        # 开始主线程
-        self.thread.start()
+    # def start(self):
+    #     self.is_ans = 1 if self.AutoAnswer.isChecked() else 0
+    #     # update_last_user_is_ans(self.is_ans)
+    #     self.CouresCheck.setEnabled(False)
+    #     self.ChaptersCheck.setEnabled(False)
+    #     self.StartBtn.setEnabled(False)
+    #     self.AutoAnswer.setEnabled(False)
+    #     # 创建线程
+    #     # self.thread = Runthread()
+    #     # 连接信号
+    #     self.thread.signal1.connect(self.Progress)  # 进程连接回传到GUI的事件
+    #     self.thread.signal2.connect(self.showstate)  # 进程连接回传到GUI的事件
+    #     self.thread.signal3.connect(self.showlog)  # 进程连接回传到GUI的事件
+    #     self.thread.signal4.connect(self.driver_handle)  # 进程连接回传到GUI的事件
+    #     # self.
+    #     # 开始主线程
+    #     self.thread.start()
 
-    def driver_handle(self, object):
-        self.dr = object
-
-    def showlog(self, log):
-        self.textEdit.insertPlainText(log + '\n')
-        self.textEdit.moveCursor(QTextCursor.End)
-
-    def showstate(self, msg):
-        self.chapternow.setStyleSheet("color:red")
-        self.chapternow.setText(str(msg))
-
-    def Progress(self, msg):
-        self.ChapterProgress.setValue(int(msg))  # 将线程的参数传入进度条
+    # def driver_handle(self, object):
+    #     self.dr = object
+    #
+    # def showlog(self, log):
+    #     self.textEdit.insertPlainText(log + '\n')
+    #     self.textEdit.moveCursor(QTextCursor.End)
+    #
+    # def showstate(self, msg):
+    #     self.chapternow.setStyleSheet("color:red")
+    #     self.chapternow.setText(str(msg))
+    #
+    # def Progress(self, msg):
+    #     self.ChapterProgress.setValue(int(msg))  # 将线程的参数传入进度条
 
     # def closeEvent(self, a0: QtGui.QCloseEvent) -> None:
     #     super().closeEvent(a0)

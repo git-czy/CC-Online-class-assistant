@@ -3,9 +3,11 @@
 # @Author: 陈志洋
 # @Email:  chenzhiyang@sinontt.com
 # @Time: 2021/12/23 16:31
+import base64
 import time
 
 import requests
+from bs4 import BeautifulSoup
 
 from chome.agent import user_agent
 
@@ -16,6 +18,8 @@ login_url = "https://passport2.chaoxing.com/login?refer=http://i.mooc.chaoxing.c
 
 route_cookie = ''
 
+login_cookie = ''
+
 
 async def get_route_cookie():
     """
@@ -24,26 +28,31 @@ async def get_route_cookie():
     在gui程序关闭前确保此cookie一致
     :return: cookie
     """
-    global route_cookie
-    res = requests.get(url=route_cookie_url)
-    cookies = res.cookies
-    # cookie_dict = {}
-    cookie_str = ''
+    try:
+        global route_cookie
+        res = requests.get(url=route_cookie_url)
+        cookies = res.cookies
+        # cookie_dict = {}
+        cookie_str = ''
 
-    for cookie in cookies:
-        # cookie_dict[cookie.name] = cookie.value
-        cookie_str += f'{cookie.name}={cookie.value}; '
-    route_cookie = cookie_str
+        for cookie in cookies:
+            # cookie_dict[cookie.name] = cookie.value
+            cookie_str += f'{cookie.name}={cookie.value}; '
+        route_cookie = cookie_str
+        return True
+    except Exception as e:
+        print(e)
+        return False
 
 
-def get_num_code(cookie: str) -> None:
+def get_num_code() -> None:
     """
     获取学习通验证码
     """
     time_now = time.time()
     time_stamp_ms = int(round(time_now * 1000))
     headers = {
-        "Cookie": cookie
+        "Cookie": route_cookie
     }
     res = requests.get(url=f"{code_num_url}{time_stamp_ms}", headers=headers)
     img_content = res.content
@@ -51,18 +60,23 @@ def get_num_code(cookie: str) -> None:
         f.write(img_content)
 
 
-def get_login_cookie(cookie: str, fid: str = '-1', code: str = '', ):
+def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password: str = '', ):
     """
     获取登录成功cookie
-    :param cookie: 会话cookie
+    :param password: 密码
+    :param uname: 用户名
     :param fid: 机构
     :param code: 验证码
-    :return: cookie
+    :return: error or None
     """
-    # cookie = get_route_cookie()
-    # get_num_code(cookie)
+
+    # get_route_cookie()
+    # get_num_code()
     # code = input('code:')
-    form_data = f"refer_0x001=http%253A%252F%252Fi.mooc.chaoxing.com&pid=-1&pidName=&fid={fid}&allowJoin=0&isCheckNumCode=1&f=0&productid=&t=true&uname=MTU1Mjg1MTAyNTg%3D&password=Y2NjNTE1MjE%3D&numcode={code}&verCode="
+    global login_cookie
+    uname = base64.encodebytes(uname)
+
+    form_data = f"refer_0x001=http%253A%252F%252Fi.mooc.chaoxing.com&pid=-1&pidName=&fid={fid}&allowJoin=0&isCheckNumCode=1&f=0&productid=&t=true&uname={uname}&password={password}&numcode={code}&verCode="
     form_data = form_data.encode("utf-8")
     headers = {
         'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
@@ -73,7 +87,7 @@ def get_login_cookie(cookie: str, fid: str = '-1', code: str = '', ):
         'Content-Length': "195",
         'Content-Type': "application/x-www-form-urlencoded",
         'Host': "passport2.chaoxing.com",
-        'Cookie': cookie,  # todo 本次登录持久化route——cookie
+        'Cookie': route_cookie,
         'Origin': 'http://passport2.chaoxing.com',
         'Referer': 'http://passport2.chaoxing.com/login?fid=&refer=',
         'Upgrade-Insecure-Requests': "1",
@@ -81,14 +95,32 @@ def get_login_cookie(cookie: str, fid: str = '-1', code: str = '', ):
     }
     try:
         res = requests.post(url=login_url, data=form_data, headers=headers)
+
+        error = check_login_status(res.content)
+        if error:
+            return error
         cookies = res.history[0].cookies
+
         # cookie_dict = {}
         cookie_str = ''
 
         for cookie in cookies:
             # cookie_dict[cookie.name] = cookie.value
             cookie_str += f'{cookie.name}={cookie.value}; '
-        print(cookie_str)
-        return cookie_str
+
+        login_cookie = cookie_str
+        return None
     except Exception as e:
         print(e.args)
+
+
+def check_login_status(content):
+    soup = BeautifulSoup(content.decode('utf-8'), 'html.parser')
+    error_log = soup.find_all('td', id="show_error")[0].text
+    if error_log != " ":
+        return error_log
+    return None
+
+
+if __name__ == '__main__':
+    get_login_cookie()

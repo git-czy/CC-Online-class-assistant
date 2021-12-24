@@ -181,8 +181,8 @@ class UiLogin(QMainWindow, Login):
         self.setupUi(self)
         self.splash = QtWidgets.QSplashScreen(QtGui.QPixmap('img/wait.gif'))
         self.splash.show()
-        self.client = None
-        self.flag = True
+        # self.client = None
+        # self.flag = True
 
     def show(self) -> None:
         super().show()
