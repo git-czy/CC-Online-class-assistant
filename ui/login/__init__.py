@@ -103,13 +103,7 @@ def login_click(ui_login: UiLogin, ui_main: UiMain):
 
         if res and not error:
             ui_login.close()
-            ui_main.splash.show()
-            # driver = load_chrome()
-            # title = driver.title
-            # print(title)
-            # driver.quit()
             ui_main.init_chrome()
-            # ui_main.show()
         else:
             refresh_code(ui_login)
             show_error(ui_login, error)
