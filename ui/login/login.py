@@ -12,6 +12,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMainWindow
 
+
 # from my_socket.tcp_client import send_data
 # from online_class_method.cc_log import writelog
 
@@ -29,7 +30,7 @@ class Login(object):
         login.setMaximumSize(QtCore.QSize(400, 450))
         login.setMouseTracking(True)
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("/img/cc.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("img/cc.ico"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         login.setWindowIcon(icon)
         self.centralwidget = QtWidgets.QWidget(login)
         self.centralwidget.setObjectName("centralwidget")
@@ -183,6 +184,7 @@ class UiLogin(QMainWindow, Login):
         self.splash.show()
         # self.client = None
         # self.flag = True
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
 
     def show(self) -> None:
         super().show()

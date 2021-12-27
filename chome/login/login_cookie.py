@@ -8,20 +8,25 @@ import time
 
 import requests
 from bs4 import BeautifulSoup
-
 from chome.agent import user_agent
 
 route_cookie_url = "https://passport2.chaoxing.com/login?fid=&refer="
 code_num_url = "https://passport2.chaoxing.com/num/code?"
 code_img_save_path = "img/code.png"
-login_url = "https://passport2.chaoxing.com/login?refer=http://i.mooc.chaoxing.com"
-
-route_cookie = ''
-
-login_cookie = ''
+login_url = "https://passport2.chaoxing.com/login?refer=https://i.mooc.chaoxing.com"
 
 
-async def get_route_cookie():
+class LoginCookie:
+    def __init__(self, cookie: str = '', cookie_list: list = None, route_cookie: str = ''):
+        self.login_cookie = cookie
+        self.login_cookie_list = cookie_list
+        self.route_cookie = route_cookie
+
+
+login_cookies = LoginCookie()
+
+
+async def get_route_cookie() -> bool:
     """
     获取学习通登录页面cookie，后面调用登录接口，以及验证码接口 需要此cookie
     此cookie随会话结束失效
@@ -29,16 +34,15 @@ async def get_route_cookie():
     :return: cookie
     """
     try:
-        global route_cookie
         res = requests.get(url=route_cookie_url)
         cookies = res.cookies
         # cookie_dict = {}
         cookie_str = ''
 
         for cookie in cookies:
-            # cookie_dict[cookie.name] = cookie.value
             cookie_str += f'{cookie.name}={cookie.value}; '
-        route_cookie = cookie_str
+
+        setattr(login_cookies, 'route_cookie', cookie_str)
         return True
     except Exception as e:
         print(e)
@@ -52,7 +56,7 @@ def get_num_code() -> None:
     time_now = time.time()
     time_stamp_ms = int(round(time_now * 1000))
     headers = {
-        "Cookie": route_cookie
+        "Cookie": login_cookies.route_cookie
     }
     res = requests.get(url=f"{code_num_url}{time_stamp_ms}", headers=headers)
     img_content = res.content
@@ -73,13 +77,16 @@ def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password:
     # get_route_cookie()
     # get_num_code()
     # code = input('code:')
-    global login_cookie
-    uname = base64.encodebytes(uname)
 
-    form_data = f"refer_0x001=http%253A%252F%252Fi.mooc.chaoxing.com&pid=-1&pidName=&fid={fid}&allowJoin=0&isCheckNumCode=1&f=0&productid=&t=true&uname={uname}&password={password}&numcode={code}&verCode="
+    uname = base64.encodebytes(uname.encode('utf-8')).decode('utf-8').replace('\n', '')
+    password = base64.encodebytes(password.encode('utf-8')).decode('utf-8').replace('\n', '')
+
+    form_data = f"refer_0x001=http%253A%252F%252Fi.mooc.chaoxing.com&pid=-1&pidName=&fid={fid}&allowJoin=0" \
+                f"&isCheckNumCode=1&f=0&productid=&t=true&uname={uname}&password={password}&numcode={code}&verCode= "
     form_data = form_data.encode("utf-8")
     headers = {
-        'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        'Accept': "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,"
+                  "application/signed-exchange;v=b3;q=0.9",
         'Accept-Encoding': "gzip, deflate, br",
         'Accept-Language': "zh-CN,zh;q=0.9,en;q=0.8",
         'Cache-Control': "max-age=0",
@@ -87,9 +94,9 @@ def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password:
         'Content-Length': "195",
         'Content-Type': "application/x-www-form-urlencoded",
         'Host': "passport2.chaoxing.com",
-        'Cookie': route_cookie,
-        'Origin': 'http://passport2.chaoxing.com',
-        'Referer': 'http://passport2.chaoxing.com/login?fid=&refer=',
+        'Cookie': login_cookies.route_cookie,
+        'Origin': 'https://passport2.chaoxing.com',
+        'Referer': 'https://passport2.chaoxing.com/login?fid=&refer=',
         'Upgrade-Insecure-Requests': "1",
         'User-Agent': user_agent
     }
@@ -101,25 +108,36 @@ def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password:
             return error
         cookies = res.history[0].cookies
 
-        # cookie_dict = {}
+        cookie_list = []
         cookie_str = ''
 
         for cookie in cookies:
-            # cookie_dict[cookie.name] = cookie.value
+            cookie_list.append({
+                'name': cookie.name,
+                'value': cookie.value,
+                'domain': cookie.domain,
+                'path': cookie.path,
+            })
             cookie_str += f'{cookie.name}={cookie.value}; '
 
-        login_cookie = cookie_str
+        setattr(login_cookies, 'login_cookie', cookie_str)
+        setattr(login_cookies, 'login_cookie_list', cookie_list)
+
         return None
     except Exception as e:
         print(e.args)
 
 
-def check_login_status(content):
+def check_login_status(content: bytes) -> str:
+    """
+    :param content:bytes流
+    :return 错误信息
+    """
     soup = BeautifulSoup(content.decode('utf-8'), 'html.parser')
     error_log = soup.find_all('td', id="show_error")[0].text
-    if error_log != " ":
+    if error_log != ' ':
         return error_log
-    return None
+    return ''
 
 
 if __name__ == '__main__':

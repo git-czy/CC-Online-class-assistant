@@ -5,19 +5,19 @@
 # @Time: 2021/12/22 17:05
 import os
 import shutil
-from asyncio import run
 
 import chromedriver_autoinstaller as dr_auto
 from selenium.webdriver import Chrome
 from selenium.webdriver.chrome.options import Options
 
 
-# chromedriver_autoinstaller.install(cwd=True)
+# from selenium.webdriver.common.service import Service
 
 
 class WebDriver:
     options = Options()
-    default_options = ['--headless']
+    # default_options = ['--headless']
+    default_options = ['blink-settings=imagesEnabled=false']
     driver = None
 
     def __init__(self, **kwargs):
@@ -44,12 +44,17 @@ class WebDriver:
             pass
         return True
 
+    def __call__(self, *args, **kwargs):
+        self._init_options()
+        return self.driver
 
-async def check_chrome_driver(chrome_version: str):
+
+async def check_chrome_driver(chrome_version: str) -> bool:
     """
     检测是否安chrome_driver版本是否正确，不正确则自动安装适配的driver
     :return: bool
     """
+
     # chrome_version = dr_auto.get_chrome_version()  # 谷歌浏览器版本
     major_version = dr_auto.utils.get_major_version(chrome_version)  # 浏览器版本大版本
     # driver_version = dr_auto.utils.get_matched_chromedriver_version(chrome_version)  # 适配浏览器版本的driver
@@ -61,11 +66,11 @@ async def check_chrome_driver(chrome_version: str):
     for file_name in cwd_file_list:
         if file_name.isdigit() and major_version != file_name:
             shutil.rmtree(os.path.join(cwd_path, file_name))
-            dr_auto.install(cwd=True)
 
+    dr_auto.install(cwd=True)
     if os.path.exists(os.path.join(cwd_path, major_version)):
-        print('ok')
         return True
+
     return False
 
 

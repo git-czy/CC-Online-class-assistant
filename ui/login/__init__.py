@@ -3,16 +3,10 @@
 # @Author: 陈志洋
 # @Email:  chenzhiyang@sinontt.com
 # @Time: 2021/12/22 17:21
-import time
-from asyncio import run
 
 from PyQt5 import QtGui
 
-# from PIL import Image
-
-# from selenium.webdriver import Chrome
-
-from chome.login_cookie import get_login_cookie, get_num_code
+from chome import get_login_cookie, get_num_code, load_chrome
 from db import DMLSqlite, get_last_login_user
 from ui.main import UiMain
 
@@ -109,19 +103,13 @@ def login_click(ui_login: UiLogin, ui_main: UiMain):
 
         if res and not error:
             ui_login.close()
-            ui_main.show()
+            ui_main.splash.show()
+            # driver = load_chrome()
+            # title = driver.title
+            # print(title)
+            # driver.quit()
+            ui_main.init_chrome()
+            # ui_main.show()
         else:
             refresh_code(ui_login)
             show_error(ui_login, error)
-
-# async def getcode(dr):  # 获取验证码
-#     time.sleep(1)
-#     dr.save_screenshot(screen_cut_path)
-#     code = dr.find_element_by_id(code_id)
-#     left = int(code.location['x'])
-#     top = int(code.location['y'])
-#     right = int(code.location['x'] + code.size['width'])
-#     bottom = int(code.location['y'] + code.size['height'])
-#     code_img = Image.open(screen_cut_path)
-#     code_img = code_img.crop((left, top, right, bottom))
-#     code_img.save(code_cut_path)

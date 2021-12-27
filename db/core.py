@@ -64,6 +64,9 @@ class DMLSqlite(DBCore):
 
     @staticmethod
     def _select_serializer(kwargs):
+        kwargs.pop('course_type', None)
+        kwargs.pop('last_chapter', None)
+        kwargs.pop('last_course', None)
         key = [f'{k} = {v}' for k, v in kwargs.items()]
         return ' AND '.join(key)
 
@@ -130,9 +133,10 @@ class DMLSqlite(DBCore):
         self.cursor.execute(sql)
         return self.select_user(id=user_id)
 
+
 # if __name__ == '__main__':
 # user = {
-#     "number": "123",
+#     "number": "11",
 #     "password": "123",
 #     "r_pas": "1",
 #     "course_type": "超星学习通",
@@ -140,6 +144,7 @@ class DMLSqlite(DBCore):
 #     "last_course": "毛概"
 # }
 # with DMLSqlite() as db:
-#     # db.insert_user(**user)
-#     res = db.select_user(number="123", r_pas="1")
-#     print(res)
+#     data = db.insert_user(**user)
+#     print(data)
+    # res = db.select_user(number="123", r_pas="1")
+    # print(res)
