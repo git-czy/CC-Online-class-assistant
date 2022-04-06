@@ -39,6 +39,10 @@ async def init_chrome(ui_login):
         # todo 日志纪录
 
 
+async def init_internet():
+    return await get_route_cookie()
+
+
 def load_chrome():
     web = WebDriver()
     dr = web()

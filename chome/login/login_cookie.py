@@ -9,6 +9,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from chome.agent import user_agent
+from exception import exception_handler
 
 route_cookie_url = "https://passport2.chaoxing.com/login?fid=&refer="
 code_num_url = "https://passport2.chaoxing.com/num/code?"
@@ -26,6 +27,7 @@ class LoginCookie:
 login_cookies = LoginCookie()
 
 
+@exception_handler
 async def get_route_cookie() -> bool:
     """
     获取学习通登录页面cookie，后面调用登录接口，以及验证码接口 需要此cookie
@@ -33,22 +35,19 @@ async def get_route_cookie() -> bool:
     在gui程序关闭前确保此cookie一致
     :return: cookie
     """
-    try:
-        res = requests.get(url=route_cookie_url)
-        cookies = res.cookies
-        # cookie_dict = {}
-        cookie_str = ''
+    res = requests.get(url=route_cookie_url)
+    cookies = res.cookies
+    # cookie_dict = {}
+    cookie_str = ''
 
-        for cookie in cookies:
-            cookie_str += f'{cookie.name}={cookie.value}; '
+    for cookie in cookies:
+        cookie_str += f'{cookie.name}={cookie.value}; '
 
-        setattr(login_cookies, 'route_cookie', cookie_str)
-        return True
-    except Exception as e:
-        print(e)
-        return False
+    setattr(login_cookies, 'route_cookie', cookie_str)
+    return True
 
 
+@exception_handler
 def get_num_code() -> None:
     """
     获取学习通验证码
@@ -64,6 +63,7 @@ def get_num_code() -> None:
         f.write(img_content)
 
 
+@exception_handler
 def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password: str = '', ):
     """
     获取登录成功cookie
@@ -100,34 +100,31 @@ def get_login_cookie(fid: str = '-1', code: str = '', uname: str = '', password:
         'Upgrade-Insecure-Requests': "1",
         'User-Agent': user_agent
     }
-    try:
-        res = requests.post(url=login_url, data=form_data, headers=headers)
 
-        error = check_login_status(res.content)
-        if error:
-            return error
-        cookies = res.history[0].cookies
+    res = requests.post(url=login_url, data=form_data, headers=headers)
 
-        cookie_list = []
-        cookie_str = ''
+    error = check_login_status(res.content)
+    if error:
+        return error
+    cookies = res.history[0].cookies
 
-        for cookie in cookies:
-            cookie_list.append({
-                'name': cookie.name,
-                'value': cookie.value,
-                'domain': cookie.domain,
-                'path': cookie.path,
-            })
-            cookie_str += f'{cookie.name}={cookie.value}; '
+    cookie_list = []
+    cookie_str = ''
 
-        setattr(login_cookies, 'login_cookie', cookie_str)
-        setattr(login_cookies, 'login_cookie_list', cookie_list)
+    for cookie in cookies:
+        cookie_list.append({
+            'name': cookie.name,
+            'value': cookie.value,
+            'domain': cookie.domain,
+            'path': cookie.path,
+        })
+        cookie_str += f'{cookie.name}={cookie.value}; '
 
-        return None
-    except Exception as e:
-        print(e.args)
+    setattr(login_cookies, 'login_cookie', cookie_str)
+    setattr(login_cookies, 'login_cookie_list', cookie_list)
 
 
+@exception_handler
 def check_login_status(content: bytes) -> str:
     """
     :param content:bytes流
