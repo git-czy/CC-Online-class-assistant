@@ -31,6 +31,7 @@ def hide_piece(piece, show):
     piece.setVisible(show)
 
 
+
 def show_error(ui, error):
     """
       :param ui:ui
